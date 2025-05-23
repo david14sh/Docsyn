@@ -1,9 +1,6 @@
 import streamlit as st
-from streamlit_card import card
 from llm import summary, ask_questions, answer_query
-from filehandling import create_pdf
-import pdfplumber
-
+from filehandling import create_pdf, extract
 
 # Streamlit UI
 st.set_page_config(page_title="Docsyn", page_icon="cropped_image.png")
@@ -12,7 +9,7 @@ st.set_page_config(page_title="Docsyn", page_icon="cropped_image.png")
 
 st.logo("cropped_image.png")
 st.markdown("## **Welcome to Docsyn - Your Document Analyst**")
-uploaded_file = st.file_uploader(label="Upload your PDF or Word document to get started!", type=["pdf", "txt", "doc", "docx"])
+uploaded_file = st.file_uploader(label="Upload your PDF or Word document to get started!", type=["pdf", "txt", "docx"])
 
 features = ["Smart Document Summaries","Instant Study Questions","Document Q&A Assistant"]
 
@@ -61,15 +58,13 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 
+
 if uploaded_file:
     # Clear the Gemini chat session when a new file is uploaded
     if "gemini_chat" in st.session_state:
         del st.session_state.gemini_chat
         
-    with pdfplumber.open(uploaded_file) as pdf:
-        text = ''
-        for page in pdf.pages:
-            text += page.extract_text() or ''
+    text = extract(uploaded_file)
 
     if st.toggle("Show Summary & Questions"):
         if "range" not in st.session_state:
