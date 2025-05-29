@@ -11,7 +11,7 @@ genai.configure(api_key=gemini_api)
 answer_model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
 
-
+@st.cache_data
 def summary(file_text, word_min, word_max):
     prompt = ( 
         f"You are to generate a summary of the following content strictly WITHIN the range of {word_min} to {word_max} words from the file: {file_text}\n\n"
@@ -23,6 +23,7 @@ def summary(file_text, word_min, word_max):
     return response.text
 
 
+@st.cache_data
 def ask_questions(file_text):
     prompt = (
         f"Based entirely on the following content: {file_text}, generate WASSCE-style questions:\n\n"
@@ -38,17 +39,17 @@ def ask_questions(file_text):
 
 def answer_query(user_query, file_text):
     # try:
-    st.session_state.gemini_chat = answer_model.start_chat(history=[])
+    gemini_chat = answer_model.start_chat(history=[])
     
     
-    st.session_state.gemini_chat.send_message(
+    gemini_chat.send_message(
         "You are Docsyn, a powerful document analyzer. Your role is to assist with document-related queries "
         "by providing accurate, concise, and context-aware responses."
     )
     
-    st.session_state.gemini_chat.send_message(f"Refer to this document content:\n{file_text}")
+    gemini_chat.send_message(f"Refer to this document content:\n{file_text}")
 
-    return st.session_state.gemini_chat
+    return gemini_chat
     
 
 

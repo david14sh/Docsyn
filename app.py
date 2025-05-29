@@ -6,8 +6,6 @@ import time
 # Streamlit UI
 st.set_page_config(page_title="Docsyn", page_icon="logo.png")
 
-
-
 st.logo("logo.png")
 st.markdown("## **Welcome to Docsyn - Your Document Analyst**")
 uploaded_file = st.file_uploader(label="Upload your PDF or Word document to get started!", type=["pdf", "txt", "docx"])
@@ -65,10 +63,6 @@ def type_text(text):
         time.sleep(0.01)  
 
 if uploaded_file:
-    # Clear the Gemini chat session when a new file is uploaded
-    if "gemini_chat" in st.session_state:
-        del st.session_state.gemini_chat
-        
     text = extract(uploaded_file)
 
     if st.toggle("Show Summary & Questions"):
@@ -81,15 +75,13 @@ if uploaded_file:
                     st.session_state.range = {"min": word_min, "max": word_max}
                     st.rerun()
             show_range_dialog()
-
-        elif "sumq" not in st.session_state:
-            st.session_state.sumq = []
+        else:
             with st.spinner("Generating Summary..."):
                 summ, questions = st.tabs(['Summary', 'Questions'])
-                st.session_state.sumq.append(summary(text, st.session_state.range['min'], st.session_state.range['max']))
-                pdf = create_pdf(st.session_state.sumq[-1])
+                summary_text = summary(text, st.session_state.range['min'], st.session_state.range['max'])
+                pdf = create_pdf(summary_text)
 
-                summ.write(st.session_state.sumq[-1])
+                summ.write(summary_text)
                 summ.download_button(
                     label="📄 Download as PDF",  
                     data=pdf,
@@ -97,17 +89,11 @@ if uploaded_file:
                     mime="application/pdf" 
                 )
 
-                st.session_state.sumq.append(ask_questions(text))
-                questions.write(st.session_state.sumq[-1])
+                questions_text = ask_questions(text)
+                questions.write(questions_text)
 
-        else:
-            summ, questions = st.tabs(['Summary', 'Questions'])
-            summ.write(st.session_state.sumq[0])
-            questions.write(st.session_state.sumq[1])
-
-    else: 
-        if "range" in st.session_state: del st.session_state["range"]
-        if "sumq" in st.session_state: del st.session_state["sumq"]
+    elif "range" in st.session_state: 
+        del st.session_state["range"]
 
     st.divider()
     transparent = "https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png"
@@ -131,7 +117,7 @@ if uploaded_file:
         with st.chat_message("Docsyn", avatar="logo.png"):
             type_text(response.text)
 
-else :
+else:
     st.session_state.clear()
 
 
