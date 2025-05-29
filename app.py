@@ -1,13 +1,14 @@
 import streamlit as st
 from llm import summary, ask_questions, answer_query
 from filehandling import create_pdf, extract
+import time
 
 # Streamlit UI
-st.set_page_config(page_title="Docsyn", page_icon="cropped_image.png")
+st.set_page_config(page_title="Docsyn", page_icon="logo.png")
 
 
 
-st.logo("cropped_image.png")
+st.logo("logo.png")
 st.markdown("## **Welcome to Docsyn - Your Document Analyst**")
 uploaded_file = st.file_uploader(label="Upload your PDF or Word document to get started!", type=["pdf", "txt", "docx"])
 
@@ -57,7 +58,11 @@ with st.sidebar:
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-
+def type_text(text):
+    t = st.empty()
+    for i in range(len(text) + 1):
+        t.markdown(text[:i])
+        time.sleep(0.01)  
 
 if uploaded_file:
     # Clear the Gemini chat session when a new file is uploaded
@@ -77,44 +82,56 @@ if uploaded_file:
                     st.rerun()
             show_range_dialog()
 
-        else:
+        elif "sumq" not in st.session_state:
+            st.session_state.sumq = []
             with st.spinner("Generating Summary..."):
                 summ, questions = st.tabs(['Summary', 'Questions'])
-                summary_text = summary(text, st.session_state.range['min'], st.session_state.range['max'])
-                pdf = create_pdf(summary_text)
+                st.session_state.sumq.append(summary(text, st.session_state.range['min'], st.session_state.range['max']))
+                pdf = create_pdf(st.session_state.sumq[-1])
 
-                summ.write(summary_text)
+                summ.write(st.session_state.sumq[-1])
                 summ.download_button(
-                    label="📄 Download as PDF",
+                    label="📄 Download as PDF",  
                     data=pdf,
                     file_name="summary.pdf",
                     mime="application/pdf" 
                 )
 
-                questions.write(ask_questions(text))
+                st.session_state.sumq.append(ask_questions(text))
+                questions.write(st.session_state.sumq[-1])
 
-    elif "range" in st.session_state: del st.session_state["range"]
+        else:
+            summ, questions = st.tabs(['Summary', 'Questions'])
+            summ.write(st.session_state.sumq[0])
+            questions.write(st.session_state.sumq[1])
+
+    else: 
+        if "range" in st.session_state: del st.session_state["range"]
+        if "sumq" in st.session_state: del st.session_state["sumq"]
 
     st.divider()
+    transparent = "https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png"
     for chat_item in st.session_state.chat_history:
         for user_msg, ai_response in chat_item.items():
-            with st.chat_message("User"):
+            with st.chat_message("User", avatar=transparent):
                 st.markdown(user_msg)
-            with st.chat_message("Docsyn"):
+            with st.chat_message("Docsyn", avatar="logo.png"):
                 st.markdown(ai_response)
 
     user_input = st.chat_input("Ask a question about your document...")
     if user_input:
+        if not "response" in st.session_state:
+            st.session_state.response = answer_query(user_input, text)
 
-        with st.chat_message("User"):
+        with st.chat_message("User", avatar=transparent):
             st.markdown(user_input)
+        response = st.session_state.response.send_message(user_input)
+        st.session_state.chat_history.append({user_input:response.text})
 
-        response = answer_query(user_input, text)
-
-        st.session_state.chat_history.append({user_input:response})
-
-        with st.chat_message("Docsyn"):
-            st.markdown(response)
+        with st.chat_message("Docsyn", avatar="logo.png"):
+            type_text(response.text)
 
 else :
     st.session_state.clear()
+
+
