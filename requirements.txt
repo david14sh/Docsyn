@@ -1,7 +1,6 @@
 streamlit
-groq
-pandas
-matplotlib
-openpyxl
-sentence-transformers
-scikit-learn
+google-generativeai
+reportlab
+pdfplumber
+python-docx
+
