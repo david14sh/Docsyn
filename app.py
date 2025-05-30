@@ -7,8 +7,13 @@ import time
 st.set_page_config(page_title="Docsyn", page_icon="logo.png")
 
 st.logo("logo.png")
-st.markdown("## **Welcome to Docsyn - Your Document Analyst**")
-uploaded_file = st.file_uploader(label="Upload your PDF or Word document to get started!", type=["pdf", "txt", "docx"])
+st.html("""
+    <div style='text-align: center; margin: 22px 0 0px 0;'>
+        <h1 style='color: #2457b5; font-size: 2.5em; font-weight: 700; margin-bottom: 5px;'>Read Less, Learn More</h1>
+        <p style='text-align: center; font-size: 1.1em; color: #666; margin: 0 20px;'>Turn hours of studying into minutes with our AI powered file analysis system. Upload any file to immediately get started. </p>
+    </div>
+""")
+uploaded_file = st.file_uploader(label="", type=["pdf", "txt", "docx"])
 
 features = ["Smart Document Summaries","Instant Study Questions","Document Q&A Assistant"]
 
@@ -24,7 +29,7 @@ with st.sidebar:
             margin-bottom: 0.5em;
             border-radius: 999px;
             background: #d3e3fd;
-            color: #2457b5;
+            color:#2457b5;
             font-weight: 600;
             font-size: 1em;
             white-space: nowrap;
