@@ -44,19 +44,16 @@ with st.sidebar:
     for feature in features:
         st.markdown(f'<div class="pill">{feature}</div>', unsafe_allow_html=True)
 
-    st.sidebar.markdown("#### How To Use")
-    st.sidebar.write("""
-    - Upload a document to get started!
-    - Ask a question about your document to get an answer.
-                     """)
-    
     st.sidebar.markdown("#### Tips")
     st.sidebar.write("""
     - Keep your prompt concise and to the point.
     - Ask specific questions to get more accurate answers.
-    - Remember, AI can make mistakes, so always verify the answer.
-                     """)
+    - Remember, AI can make mistakes, so always verify the answer.""")
     
+    if st.sidebar.button("Clear Chat",type="primary"):
+        del st.session_state["chat_history"]
+        del st.session_state["response"]
+        st.rerun()
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
@@ -65,7 +62,7 @@ def type_text(text):
     t = st.empty()
     for i in range(len(text) + 1):
         t.markdown(text[:i])
-        time.sleep(0.01)  
+        time.sleep(0.005)  
 
 if uploaded_file:
     text = extract(uploaded_file)
@@ -87,24 +84,12 @@ if uploaded_file:
                 pdf = create_pdf(summary_text)
 
                 summ.write(summary_text)
-                st.markdown("""
-                    <style>
-                    .stDownloadButton button {
-                        background-color: #2457b5;
-                        color: white;
-                    }
-                    .stDownloadButton button:hover {
-                        background-color: #1a4589;
-                        color: white;
-                        border-color: #1a4589;
-                    }
-                    </style>
-                """, unsafe_allow_html=True)
                 summ.download_button(
                     label="Download as PDF",  
-                    data=pdf,
+                    data=pdf.getvalue(),
                     file_name="summary.pdf",
-                    mime="application/pdf" 
+                    mime="application/pdf",
+                    type="primary"
                 )
 
                 questions_text = ask_questions(text)

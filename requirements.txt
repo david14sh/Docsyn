@@ -1,6 +1,6 @@
 streamlit
 google-generativeai
-reportlab
+fpdf
 pdfplumber
 python-docx
 
