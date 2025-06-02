@@ -10,7 +10,7 @@ st.logo("logo.png")
 st.html("""
     <div style='text-align: center; margin: 22px 0 0px 0;'>
         <h1 style='color: #2457b5; font-size: 2.5em; font-weight: 700; margin-bottom: 5px;'>Read Less, Learn More</h1>
-        <p style='text-align: center; font-size: 1.1em; color: #666; margin: 0 20px;'>Turn hours of studying into minutes with our AI powered file analysis system. Upload any file to immediately get started. </p>
+        <p style='text-align: center; font-size: 1.1em; color: #666; margin: 0 20px;'>Turn hours of studying into minutes with our AI powered document analysis system. Upload any file to immediately get started. </p>
     </div>
 """)
 uploaded_file = st.file_uploader(label="", type=["pdf", "txt", "docx"])
@@ -74,8 +74,8 @@ if uploaded_file:
         if "range" not in st.session_state:
             @st.dialog("Select Your Range")
             def show_range_dialog():
-                word_min = st.number_input("Minimum word count: ", min_value=0, max_value=5000)
-                word_max = st.number_input("Maximum word count: ", min_value=word_min, max_value=10000)
+                word_min = st.number_input("Minimum word count: ", min_value=100, max_value=2000)
+                word_max = st.number_input("Maximum word count: ", min_value=word_min, max_value=2500)
                 if st.button("Confirm Range"):
                     st.session_state.range = {"min": word_min, "max": word_max}
                     st.rerun()
@@ -87,8 +87,21 @@ if uploaded_file:
                 pdf = create_pdf(summary_text)
 
                 summ.write(summary_text)
+                st.markdown("""
+                    <style>
+                    .stDownloadButton button {
+                        background-color: #2457b5;
+                        color: white;
+                    }
+                    .stDownloadButton button:hover {
+                        background-color: #1a4589;
+                        color: white;
+                        border-color: #1a4589;
+                    }
+                    </style>
+                """, unsafe_allow_html=True)
                 summ.download_button(
-                    label="📄 Download as PDF",  
+                    label="Download as PDF",  
                     data=pdf,
                     file_name="summary.pdf",
                     mime="application/pdf" 
