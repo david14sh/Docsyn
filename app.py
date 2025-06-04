@@ -48,12 +48,14 @@ with st.sidebar:
     st.sidebar.write("""
     - Keep your prompt concise and to the point.
     - Ask specific questions to get more accurate answers.
-    - Remember, AI can make mistakes, so always verify the answer.""")
+    - AI can make mistakes, so always verify the answer
+    """)
     
     if st.sidebar.button("Clear Chat",type="primary"):
-        del st.session_state["chat_history"]
-        del st.session_state["response"]
-        st.rerun()
+        if "chat_history" in st.session_state:
+            del st.session_state["chat_history"]
+        if "response" in st.session_state:
+            del st.session_state["response"]
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []

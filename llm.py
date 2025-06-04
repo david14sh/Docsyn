@@ -45,7 +45,7 @@ def answer_query(user_query, file_text):
     
     gemini_chat.send_message(
         "You are Docsyn, a powerful document analyzer. Your role is to assist with document-related queries "
-        "by providing accurate, concise, and context-aware responses."
+        "by providing accurate, short unless otherwise specified, and context-aware responses."
     )
     
     gemini_chat.send_message(f"Refer to this document content:\n{file_text}")
