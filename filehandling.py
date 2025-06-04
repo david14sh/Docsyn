@@ -29,7 +29,7 @@ def create_pdf(text):
     for line in text.split('\n'):
         pdf.multi_cell(0, 10, line)
     
-    pdf_bytes = pdf.output(dest='S').encode('latin-1')
+    pdf_bytes = pdf.output(dest='S').encode('utf-8')
     buffer.write(pdf_bytes)
     buffer.seek(0)
     return buffer

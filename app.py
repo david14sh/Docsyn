@@ -78,7 +78,7 @@ if uploaded_file:
                     st.rerun()
             show_range_dialog()
         else:
-            with st.spinner("Generating Summary..."):
+            with st.spinner("Generating..."):
                 summ, questions = st.tabs(['Summary', 'Questions'])
                 summary_text = summary(text, st.session_state.range['min'], st.session_state.range['max'])
                 pdf = create_pdf(summary_text)

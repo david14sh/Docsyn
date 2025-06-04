@@ -11,10 +11,11 @@ genai.configure(api_key=gemini_api)
 answer_model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
 
-@st.cache_data(show_spinner=False, ttl=2100)
+@st.cache_data(show_spinner=False)
 def summary(file_text, word_min, word_max):
     prompt = ( 
-        f"You are to generate a summary of the following content strictly WITHIN the range of {word_min} to {word_max} words from the file: {file_text}\n\n"
+        f"You are to generate a summary from the file: {file_text}\n\n"
+        f"The number of words in the summary should BE BETWEEN {word_min} AND {word_max} WORDS \n"
         f"If the max range: {word_max} is greater than the number of words in the document, you may include helpful external info to meet the word range.\n"
         "Return only the summary. No explanation or commentary."
     )
@@ -27,10 +28,10 @@ def summary(file_text, word_min, word_max):
 def ask_questions(file_text):
     prompt = (
         f"Based entirely on the following content: {file_text}, generate WASSCE-style questions:\n\n"
-        "1. Questions must be seventy percent objective and thirty percent theory\n"
+        "1. Questions MUST BE seventy percent objective and thirty percent theory\n"
         "2. Objective questions must have 4 options (A-D)\n"
         "3. Generate 15-30 questions based on content length\n"
-        "Return only the questions. No explanation or commentary."
+        "Return ONLY the questions."
     )
 
     response = model.generate_content(prompt)
