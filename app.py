@@ -1,6 +1,6 @@
 import streamlit as st
-from llm import summary, ask_questions, answer_query
-from filehandling import create_pdf, extract
+from llm import summary, ask_questions, answer_query, answer_questions
+from filehandling import extract
 import time
 
 # Streamlit UI
@@ -81,21 +81,24 @@ if uploaded_file:
             show_range_dialog()
         else:
             with st.spinner("Generating..."):
-                summ, questions = st.tabs(['Summary', 'Questions'])
+                summ, questions, answers = st.tabs(['Summary', 'Questions', 'Answers'])
+                
+                # Generate content directly - caching is handled by the functions
                 summary_text = summary(text, st.session_state.range['min'], st.session_state.range['max'])
-                pdf = create_pdf(summary_text)
+                questions_text = ask_questions(text)
+                answers_text = answer_questions(questions_text)
 
                 summ.write(summary_text)
                 summ.download_button(
-                    label="Download as PDF",  
-                    data=pdf.getvalue(),
-                    file_name="summary.pdf",
-                    mime="application/pdf",
+                    label="Download as TXT",  
+                    data=summary_text,
+                    file_name="summary.txt",
+                    mime="text/plain",
                     type="primary"
                 )
 
-                questions_text = ask_questions(text)
                 questions.write(questions_text)
+                answers.write(answers_text)
 
     elif "range" in st.session_state: 
         del st.session_state["range"]
@@ -112,7 +115,7 @@ if uploaded_file:
     user_input = st.chat_input("Ask a question about your document...")
     if user_input:
         if not "response" in st.session_state:
-            st.session_state.response = answer_query(user_input, text)
+            st.session_state.response = answer_query(text)
 
         with st.chat_message("User", avatar=transparent):
             st.markdown(user_input)

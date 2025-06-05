@@ -3,13 +3,12 @@ import google.generativeai as genai
 
 GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash-latest")
+model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
-
+# Separate API key for answer model to distribute load
 gemini_api = st.secrets['GEM_API_KEY']
 genai.configure(api_key=gemini_api)
 answer_model = genai.GenerativeModel("gemini-2.0-flash-lite")
-
 
 @st.cache_data(show_spinner=False)
 def summary(file_text, word_min, word_max):
@@ -23,7 +22,6 @@ def summary(file_text, word_min, word_max):
     response = model.generate_content(prompt)
     return response.text
 
-
 @st.cache_data(show_spinner=False)
 def ask_questions(file_text):
     prompt = (
@@ -31,28 +29,32 @@ def ask_questions(file_text):
         "1. Questions MUST BE seventy percent objective and thirty percent theory\n"
         "2. Objective questions must have 4 options (A-D)\n"
         "3. Generate 15-30 questions based on content length\n"
-        "Return ONLY the questions."
+        "Return only the questions. Nothing else."
     )
 
     response = model.generate_content(prompt)
     return response.text
 
+@st.cache_data(show_spinner=False)
+def answer_questions(questions):
+    prompt = (
+        f"Answer each question in this text: {questions}\n"
+        "If it's an objective question, just choose from the options provided, no explanations\n"
+        "If it's theory, give a concise answer, not too long, not too short, and not too vague\n"
+        "Return ONLY the answers in the same order as the questions"
+    )
 
-def answer_query(user_query, file_text):
-    # try:
+    response = model.generate_content(prompt)
+    return response.text
+
+def answer_query(file_text):
     gemini_chat = answer_model.start_chat(history=[])
-    
     
     gemini_chat.send_message(
         "You are Docsyn, a powerful document analyzer. Your role is to assist with document-related queries "
-        "by providing accurate, short unless otherwise specified, and context-aware responses."
+        "by providing accurate, concise, and context-aware responses."
     )
     
     gemini_chat.send_message(f"Refer to this document content:\n{file_text}")
 
     return gemini_chat
-    
-
-
-    # except Exception as e:
-    #     return "I apologize, but I encountered an error while processing your query. Please try again."

@@ -1,6 +1,5 @@
 streamlit
 google-generativeai
-fpdf2
 pdfplumber
 python-docx
 
