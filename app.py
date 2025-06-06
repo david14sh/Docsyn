@@ -4,7 +4,7 @@ from filehandling import extract
 import time
 
 # Streamlit UI
-st.set_page_config(page_title="Docsyn", page_icon="logo.png")
+st.set_page_config(page_title="Docsyn", page_icon="logo.png",layout="wide")
 
 st.logo("logo.png")
 st.html("""
@@ -13,7 +13,11 @@ st.html("""
         <p style='text-align: center; font-size: 1.1em; color: #666; margin: 0 20px;'>Turn hours of studying into minutes with our AI powered document analysis system. Upload any file to immediately get started. </p>
     </div>
 """)
-uploaded_file = st.file_uploader(label="", type=["pdf", "txt", "docx"])
+uploaded_file = st.file_uploader(
+    label="Upload your document",
+    type=["pdf", "txt", "docx"],
+    label_visibility="collapsed"
+)
 
 features = ["Smart Document Summaries","Instant Study Questions","Document Q&A Assistant"]
 
@@ -82,11 +86,7 @@ if uploaded_file:
         else:
             with st.spinner("Generating..."):
                 summ, questions, answers = st.tabs(['Summary', 'Questions', 'Answers'])
-                
-                # Generate content directly - caching is handled by the functions
                 summary_text = summary(text, st.session_state.range['min'], st.session_state.range['max'])
-                questions_text = ask_questions(text)
-                answers_text = answer_questions(questions_text)
 
                 summ.write(summary_text)
                 summ.download_button(
@@ -97,7 +97,10 @@ if uploaded_file:
                     type="primary"
                 )
 
+                questions_text = ask_questions(text)
                 questions.write(questions_text)
+
+                answers_text = answer_questions(questions_text)
                 answers.write(answers_text)
 
     elif "range" in st.session_state: 
