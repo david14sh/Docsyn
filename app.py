@@ -84,25 +84,29 @@ if uploaded_file:
                     st.rerun()
             show_range_dialog()
         else:
-            with st.spinner("Generating..."):
-                summ, questions, answers = st.tabs(['Summary', 'Questions', 'Answers'])
-                summary_text = summary(text, st.session_state.range['min'], st.session_state.range['max'])
+            progress = st.progress(0,"In progress, Please Wait")
+            summ, questions, answers = st.tabs(['Summary', 'Questions', 'Answers'])
+            summary_text = summary(text, st.session_state.range['min'], st.session_state.range['max'])
+            progress.progress(33)
+            summ.write(summary_text)
+            summ.download_button(
+                label="Download as TXT",  
+                data=summary_text,
+                file_name="summary.txt",
+                mime="text/plain",
+                type="primary"
+            )
 
-                summ.write(summary_text)
-                summ.download_button(
-                    label="Download as TXT",  
-                    data=summary_text,
-                    file_name="summary.txt",
-                    mime="text/plain",
-                    type="primary"
-                )
+            questions_text = ask_questions(text)
+            progress.progress(66)
+            questions.write(questions_text)
 
-                questions_text = ask_questions(text)
-                questions.write(questions_text)
-
-                answers_text = answer_questions(questions_text)
-                answers.write(answers_text)
-
+            answers_text = answer_questions(questions_text)
+            progress.progress(99)
+            answers.write(answers_text)
+            progress.progress(100)
+            progress.empty()  # Clear the progress bar after completion
+            
     elif "range" in st.session_state: 
         del st.session_state["range"]
 
