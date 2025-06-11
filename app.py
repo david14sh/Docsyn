@@ -25,7 +25,7 @@ st.html("""
 uploaded_file = st.file_uploader(
     label="Upload your document",
     type=["pdf", "txt", "docx"],
-    label_visibility="collapsed"
+    label_visibility="collapsed",
 )
 
 features = ["Smart Document Summaries","Instant Study Questions","Document Q&A Assistant"]
