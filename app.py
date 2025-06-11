@@ -6,6 +6,15 @@ import time
 # Streamlit UI
 st.set_page_config(page_title="Docsyn", page_icon="logo.png",layout="wide")
 
+# Add auto-scroll JavaScript
+st.markdown("""
+    <script>
+        const scrollToBottom = () => {
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+    </script>
+""", unsafe_allow_html=True)
+
 st.logo("logo.png")
 st.html("""
     <div style='text-align: center; margin: 22px 0 0px 0;'>
@@ -101,7 +110,7 @@ if uploaded_file:
             progress.progress(66)
             questions.write(questions_text)
 
-            answers_text = answer_questions(questions_text)
+            answers_text = answer_questions(questions_text,text)
             progress.progress(99)
             answers.write(answers_text)
             progress.progress(100)
@@ -119,18 +128,20 @@ if uploaded_file:
             with st.chat_message("Docsyn", avatar="logo.png"):
                 st.markdown(ai_response)
 
-    user_input = st.chat_input("Ask a question about your document...")
-    if user_input:
-        if not "response" in st.session_state:
+    if not "response" in st.session_state:
             st.session_state.response = answer_query(text)
-
+    if user_input := st.chat_input("Ask a question about your document",max_chars=2000):
+        st.markdown("""
+            <script>
+                scrollToBottom();
+            </script>
+        """, unsafe_allow_html=True)
         with st.chat_message("User", avatar=transparent):
             st.markdown(user_input)
         response = st.session_state.response.send_message(user_input)
-        st.session_state.chat_history.append({user_input:response.text})
-
         with st.chat_message("Docsyn", avatar="logo.png"):
             type_text(response.text)
+        st.session_state.chat_history.append({user_input:response.text})
 
 else:
     st.session_state.clear()

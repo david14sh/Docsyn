@@ -1,11 +1,12 @@
 import streamlit as st
 import google.generativeai as genai
 
+
 GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
-# Separate API key for answer model to distribute load
+
 gemini_api = st.secrets['GEM_API_KEY']
 genai.configure(api_key=gemini_api)
 answer_model = genai.GenerativeModel("gemini-2.0-flash-lite")
@@ -22,7 +23,7 @@ def summary(file_text, word_min, word_max):
     response = model.generate_content(prompt)
     return response.text
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False,)
 def ask_questions(file_text):
     prompt = (
         f"Based entirely on the following content: {file_text}, generate WASSCE-style questions:\n\n"
@@ -36,9 +37,10 @@ def ask_questions(file_text):
     return response.text
 
 @st.cache_data(show_spinner=False)
-def answer_questions(questions):
+def answer_questions(questions,file_text):
     prompt = (
         f"Answer each question in this text: {questions}\n"
+        f"Refer to the origin of the questions: {file_text} if needed.\n "
         "If it's an objective question, just choose from the options provided, no explanations\n"
         "If it's theory, give a concise answer, not too long, not too short, and not too vague\n"
         "Return ONLY the answers in the same order as the questions"
@@ -51,8 +53,7 @@ def answer_query(file_text):
     gemini_chat = answer_model.start_chat(history=[])
     
     gemini_chat.send_message(
-        "You are Docsyn, a powerful document analyzer. Your role is to assist with document-related queries "
-        "by providing accurate, concise, and context-aware responses."
+    "You are Docsyn, a powerful document analyzer. Your role is to assist with document-related queries by providing accurate, brief, to-the-point, and context-aware responses.\n"
     )
     
     gemini_chat.send_message(f"Refer to this document content:\n{file_text}")
