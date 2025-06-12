@@ -3,17 +3,8 @@ from llm import summary, ask_questions, answer_query, answer_questions
 from filehandling import extract
 import time
 
-# Streamlit UI
+# Streamlit UI  
 st.set_page_config(page_title="Docsyn", page_icon="logo.png",layout="wide")
-
-# Add auto-scroll JavaScript
-st.markdown("""
-    <script>
-        const scrollToBottom = () => {
-            window.scrollTo(0, document.body.scrollHeight);
-        }
-    </script>
-""", unsafe_allow_html=True)
 
 st.logo("logo.png")
 st.html("""
@@ -88,21 +79,22 @@ if uploaded_file:
             def show_range_dialog():
                 word_min = st.number_input("Minimum word count: ", min_value=100, max_value=2000)
                 word_max = st.number_input("Maximum word count: ", min_value=word_min, max_value=2500)
-                if st.button("Confirm Range"):
-                    st.session_state.range = {"min": word_min, "max": word_max}
+                mode = st.selectbox("Select Mode",options=["Paragraphs","Bullet Points"])
+                if st.button("Confirm"):
+                    st.session_state.range = {"min": word_min, "max": word_max, "mode": mode}
                     st.rerun()
             show_range_dialog()
         else:
             progress = st.progress(0,"In progress, Please Wait")
             summ, questions, answers = st.tabs(['Summary', 'Questions', 'Answers'])
-            summary_text = summary(text, st.session_state.range['min'], st.session_state.range['max'])
+            summary_text = summary(text, st.session_state.range['min'], st.session_state.range['max'], st.session_state.range['mode'])
             progress.progress(33)
             summ.write(summary_text)
             summ.download_button(
-                label="Download as TXT",  
+                label="Download as Word",  
                 data=summary_text,
-                file_name="summary.txt",
-                mime="text/plain",
+                file_name="summary.docx",
+                mime="application/msword",
                 type="primary"
             )
 
@@ -131,11 +123,6 @@ if uploaded_file:
     if not "response" in st.session_state:
             st.session_state.response = answer_query(text)
     if user_input := st.chat_input("Ask a question about your document",max_chars=2000):
-        st.markdown("""
-            <script>
-                scrollToBottom();
-            </script>
-        """, unsafe_allow_html=True)
         with st.chat_message("User", avatar=transparent):
             st.markdown(user_input)
         response = st.session_state.response.send_message(user_input)

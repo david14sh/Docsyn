@@ -12,9 +12,9 @@ genai.configure(api_key=gemini_api)
 answer_model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
 @st.cache_data(show_spinner=False)
-def summary(file_text, word_min, word_max):
+def summary(file_text, word_min, word_max, mode):
     prompt = ( 
-        f"You are to generate a summary from the file: {file_text}\n\n"
+        f"You are to generate a summary from the file: {file_text} using {mode}\n\n"
         f"The number of words in the summary should BE BETWEEN {word_min} AND {word_max} WORDS \n"
         f"If the max range: {word_max} is greater than the number of words in the document, you may include helpful external info to meet the word range.\n"
         "Return only the summary. No explanation or commentary."
@@ -53,7 +53,7 @@ def answer_query(file_text):
     gemini_chat = answer_model.start_chat(history=[])
     
     gemini_chat.send_message(
-    "You are Docsyn, a powerful document analyzer. Your role is to assist with document-related queries by providing accurate, brief, to-the-point, and context-aware responses.\n"
+    "You are Docsyn, a powerful document analyzer. Your role is to assist with document-related queries by providing accurate, to-the-point, and context-aware responses.\n"
     )
     
     gemini_chat.send_message(f"Refer to this document content:\n{file_text}")
