@@ -41,7 +41,7 @@ def summary(file_text, word_min, word_max, mode):
 @st.cache_data(show_spinner=False)
 def ask_questions(file_text):
     prompt = (
-        f"Based ENTIRELY on the following content: {file_text}, generate WASSCE-style questions:\n\n"
+        f"Based entirely on the following content: {file_text}, generate WASSCE-style questions regardless of the nature of the file.\n\n"
         "1. Questions MUST BE seventy percent objective and thirty percent theory\n"
         "2. Objective questions must have 4 options (A-D)\n"
         "3. Generate 15-30 questions based on content length\n"
