@@ -58,8 +58,8 @@ with st.sidebar:
     if st.sidebar.button("Clear Chat",type="primary"):
         if "chat_history" in st.session_state:
             del st.session_state["chat_history"]
-        if "response" in st.session_state:
-            del st.session_state["response"]
+        if "gemini_chat" in st.session_state:
+            del st.session_state['gemini_chat']
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
@@ -71,6 +71,7 @@ def type_text(text):
         time.sleep(0.005)  
 
 if uploaded_file:
+
     text = extract(uploaded_file)
 
     if st.toggle("Show Summary & Questions"):
@@ -106,7 +107,7 @@ if uploaded_file:
             progress.progress(99)
             answers.write(answers_text)
             progress.progress(100)
-            progress.empty()  # Clear the progress bar after completion
+            progress.empty()  
             
     elif "range" in st.session_state: 
         del st.session_state["range"]
@@ -120,15 +121,14 @@ if uploaded_file:
             with st.chat_message("Docsyn", avatar="logo.png"):
                 st.markdown(ai_response)
 
-    if not "response" in st.session_state:
-            st.session_state.response = answer_query(text)
+    
     if user_input := st.chat_input("Ask a question about your document",max_chars=2000):
         with st.chat_message("User", avatar=transparent):
             st.markdown(user_input)
-        response = st.session_state.response.send_message(user_input)
+        response = answer_query(user_input,text)
         with st.chat_message("Docsyn", avatar="logo.png"):
-            type_text(response.text)
-        st.session_state.chat_history.append({user_input:response.text})
+            type_text(response)
+        st.session_state.chat_history.append({user_input:response})
 
 else:
     st.session_state.clear()

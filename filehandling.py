@@ -15,5 +15,5 @@ def extract(file):
         text = '\n'.join([para.text for para in doc.paragraphs])
     elif file.name.endswith('.txt'):
         text = file.getvalue().decode('utf-8')
-    return text
 
+    return text

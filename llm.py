@@ -1,6 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
-
+from google.api_core.exceptions import ResourceExhausted, RetryError, ServiceUnavailable
+import requests.exceptions
 
 GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=GEMINI_API_KEY)
@@ -11,6 +12,19 @@ gemini_api = st.secrets['GEM_API_KEY']
 genai.configure(api_key=gemini_api)
 answer_model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
+def handle_api_errors(func):
+    """Decorator to handle common API errors"""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ResourceExhausted:
+            st.error("You've hit your limit, try again tomorrow")
+        except (RetryError, ServiceUnavailable, requests.exceptions.ConnectionError, 
+                requests.exceptions.Timeout):
+            st.error("Please check your network and try again")
+    return wrapper
+
+@handle_api_errors
 @st.cache_data(show_spinner=False)
 def summary(file_text, word_min, word_max, mode):
     prompt = ( 
@@ -23,7 +37,8 @@ def summary(file_text, word_min, word_max, mode):
     response = model.generate_content(prompt)
     return response.text
 
-@st.cache_data(show_spinner=False,)
+@handle_api_errors
+@st.cache_data(show_spinner=False)
 def ask_questions(file_text):
     prompt = (
         f"Based entirely on the following content: {file_text}, generate WASSCE-style questions:\n\n"
@@ -36,6 +51,7 @@ def ask_questions(file_text):
     response = model.generate_content(prompt)
     return response.text
 
+@handle_api_errors
 @st.cache_data(show_spinner=False)
 def answer_questions(questions,file_text):
     prompt = (
@@ -49,13 +65,14 @@ def answer_questions(questions,file_text):
     response = model.generate_content(prompt)
     return response.text
 
-def answer_query(file_text):
-    gemini_chat = answer_model.start_chat(history=[])
+@handle_api_errors
+def answer_query(query,file):
+    if "gemini_chat" not in st.session_state:
+        st.session_state.gemini_chat = answer_model.start_chat(history=[])
     
-    gemini_chat.send_message(
-    "You are Docsyn, a powerful document analyzer. Your role is to assist with document-related queries by providing accurate, to-the-point, and context-aware responses.\n"
-    )
+        st.session_state.gemini_chat.send_message([
+            f"You are Docsyn, a powerful document analyzer. Your role is to assist with document-related queries by providing accurate, to-the-point, and context-aware responses. Use the following document to answer the question: {file}"
+        ])
     
-    gemini_chat.send_message(f"Refer to this document content:\n{file_text}")
-
-    return gemini_chat
+    response = st.session_state.gemini_chat.send_message(query)
+    return response.text
