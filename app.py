@@ -94,7 +94,7 @@ if uploaded_file:
             summ.download_button(
                 label="Download as Word",  
                 data=summary_text,
-                file_name="summary.docx",
+                file_name="summary.doc",
                 mime="application/msword",
                 type="primary"
             )
